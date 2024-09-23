@@ -45,7 +45,7 @@ namespace Assignment1
         // for referring to the previous answer 
         private Expression expr;
         public Calculation() { }
-
+        
         //can be later extended to add multiple expressions in order
         //then calculate all of them sequentially
         //return value is false if it is not a valid expression
