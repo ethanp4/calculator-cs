@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Assignment1
-{
+namespace Assignment1 {
     // this object represents an expression (ie 5+2*3)
     public class Expression {
         private string stringExpr { get; set; }
@@ -44,7 +43,7 @@ namespace Assignment1
         // for referring to the previous answer 
         private Expression expr;
         public Calculation() { }
-        
+
         //can be later extended to add multiple expressions in order
         //then calculate all of them sequentially
         //return value is false if it is not a valid expression
@@ -70,27 +69,20 @@ namespace Assignment1
             return 0;
         }
     }
-  
-    public class Program
-    {
-        public static string ProcessCommand(string input)
-        {
-            try
-            {
+
+    public class Program {
+        public static string ProcessCommand(string input) {
+            try {
                 // TODO Evaluate the expression and return the result
                 return "";
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 return "Error evaluating expression: " + e;
             }
         }
 
-        static void Main(string[] args)
-        {
+        static void Main(string[] args) {
             string input;
-            while ((input = Console.ReadLine()) != "exit")
-            {
+            while ((input = Console.ReadLine()) != "exit") {
                 Console.WriteLine(ProcessCommand(input));
             }
         }
