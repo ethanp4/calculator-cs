@@ -3,20 +3,88 @@ using System.Collections.Generic;
 
 namespace Assignment1 {
     // this object represents an expression (ie 5+2*3)
-    public class Expression {
+    public class Expression 
+    {
         private string stringExpr { get; set; }
-        private bool isEvaluated { get; } = false;
+        private bool isEvaluated { get; set; } = false; //modified 
         private List<string> postFixExpr;
         public Expression(string expr) {
             stringExpr = expr;
+            postFixExpr = convertToPostfix(expr); //addwd 
+            
         }
 
-        // convert the string to a postfix expression
+        // convert the string to a postfix expression (Reverse Polish Notation)
         // without sorting it by order of operations
         public List<string> convertToPostfix(string expr) {
             var ret = new List<string>();
+            var operatorStack = new Stack<char>(); // added: Stack to hold operators
+
+            for (int i = 0; i < expr.Length; i++)
+            {
+                char ch = expr[i];
+
+                if (char.IsWhiteSpace(ch)) continue; // ignore empty spaces
+
+                if (char.IsDigit(ch))
+                { // added: Parse numbers
+                    string number = string.Empty;
+                    while (i < expr.Length && (char.IsDigit(expr[i]) || expr[i] == '.'))
+                    {
+                        number += expr[i];
+                        i++;
+                    }
+                    i--; // adjust index after loop
+                    ret.Add(number);
+                }
+                else if (ch == '(')
+                {
+                    operatorStack.Push(ch); // added: Push '(' to stack
+                }
+                else if (ch == ')')
+                {
+                    // added: Pop operators until '(' is found
+                    while (operatorStack.Count > 0 && operatorStack.Peek() != '(')
+                    {
+                        ret.Add(operatorStack.Pop().ToString());
+                    }
+                    operatorStack.Pop(); // Pop the '('
+                }
+                else if (isOperator(ch))
+                {
+                    // added: Pop operators with higher or equal precedence
+                    while (operatorStack.Count > 0 && Prior(operatorStack.Peek()) >= Prior(ch))
+                    {
+                        ret.Add(operatorStack.Pop().ToString());
+                    }
+                    operatorStack.Push(ch); // Push current operator
+                }
+            }
+
+            // Pop remaining operators
+            while (operatorStack.Count > 0)
+            {
+                ret.Add(operatorStack.Pop().ToString());
+            }
 
             return ret;
+        }
+
+
+        //added:to determine the order of operatord evaluated in an expression
+        private int Prior(char op)
+        {
+            switch (op)
+            {
+                case '+':
+                case '-':
+                    return 1;
+                case '*':
+                case '/':
+                    return 2;
+                default:
+                    return 0;
+            }
         }
 
         // return true if "ch" is an operator
