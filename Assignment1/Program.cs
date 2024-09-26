@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Assignment1 {
     // this object represents an expression (ie 5+2*3)
@@ -47,8 +48,8 @@ namespace Assignment1 {
         //can be later extended to add multiple expressions in order
         //then calculate all of them sequentially
         //return value is false if it is not a valid expression
-        public bool setExpression() {
-            if (!isExpressionValid()) { return false; }
+        public bool setExpression(string expr) {
+            if (!isExpressionValid(expr)) { return false; }
 
             return true;
         }
@@ -56,9 +57,37 @@ namespace Assignment1 {
         // checks if the expression can be evaluated in the first place
         //first check if expression is only + - / */x, (), and numbers
         //then expression should make sense ie 2+3 4* and 9(*3*5) are not valid
-        public bool isExpressionValid() {
-
-            return false;
+        public bool isExpressionValid(string expr) {
+            var res = Regex.IsMatch(expr, "^[0-9+ ()*-/]+$"); // expression can only be these characters and must be at least 1 long
+            //Console.WriteLine(expr + " is " + res);
+            string previous = ""; // expression must go number/operator/number/operator
+            string current = "";
+            expr = Regex.Replace(expr, @"\s+", " "); // get rid of repeating spaces
+            expr = expr.Trim();
+            int bracketCounter = 0;
+            var split = expr.Split(' ');
+            for (int i = 0; i < split.Length; i++) {
+                previous = current;
+                current = split[i];
+                // previous and current cannot both be numbers
+                if (previous != "") { // check only after first iteration and skip brackets
+                    if (float.TryParse(previous, out float _) == float.TryParse(current, out float _)) {
+                        Console.WriteLine("previous and current cannot both be numbers");
+                        return false;
+                    }
+                }
+                if (current == "(") {
+                    bracketCounter++;
+                } else if (current == ")") {
+                    bracketCounter--;
+                }
+                if (bracketCounter < 0) {
+                    Console.WriteLine("Mismatched brackets");
+                    return false;
+                }
+            }
+            Console.WriteLine("it is an expression");
+            return true;
         }
 
         //
@@ -74,6 +103,8 @@ namespace Assignment1 {
         public static string ProcessCommand(string input) {
             try {
                 // TODO Evaluate the expression and return the result
+                var c = new Calculation();
+                c.setExpression(input);
                 return "";
             } catch (Exception e) {
                 return "Error evaluating expression: " + e;
