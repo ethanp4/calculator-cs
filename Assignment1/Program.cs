@@ -44,7 +44,7 @@ namespace Assignment1 {
                         ret.Add(operatorStack.Pop().ToString());
                     }
                     operatorStack.Pop(); // Pop the '('
-                } else if (isOperator(ch)) {
+                } else if (isOperator(ch.ToString())) {
                     // added: Pop operators with higher or equal precedence
                     while (operatorStack.Count > 0 && Prior(operatorStack.Peek()) >= Prior(ch)) {
                         ret.Add(operatorStack.Pop().ToString());
@@ -77,21 +77,44 @@ namespace Assignment1 {
         }
 
         // return true if "ch" is an operator
-        private bool isOperator(char ch) {
-            return Regex.IsMatch(ch.ToString(), "^[=+/*]+$");
+        private bool isOperator(string ch) {
+            return Regex.IsMatch(ch, "^[=+/*]+$");
         }
 
         // evaluates the postfix expression and returns the result
         // regardless of if it is sorted by OOP or not
         public double evaluateExpr() {
             Console.WriteLine("evaluating");
-            char ch;
-            int val;
-            int A, B;
-            for(int i = 0; char.Parse(postFixExpr[i]) != ')'; i++) {
-
+            var stack = new Stack<int>();
+            for (int i = 0; i < postFixExpr.Count; i++) {
+                var e = postFixExpr[i];
+                if (isOperator(e)) {
+                    int a;
+                    int b;
+                    switch (e) {
+                        case ("*"):
+                            stack.Push(stack.Pop() * stack.Pop());
+                            break;
+                        case ("-"):
+                            a = stack.Pop();
+                            b = stack.Pop();
+                            stack.Push(b - a);
+                            break;
+                        case ("+"):
+                            stack.Push(stack.Pop() + stack.Pop());
+                            break;
+                        case ("/"):
+                            a = stack.Pop();
+                            b = stack.Pop();
+                            stack.Push(b / a);
+                            break;
+                    }
+                } else {
+                    stack.Push(int.Parse(e));
+                }
             }
-            return 0;
+
+            return stack.Pop();
         }
     }
 
@@ -131,8 +154,8 @@ namespace Assignment1 {
                 foreach (var e in c.getExpression()) {
                     Console.Write(e + " ");
                 }
-                c.evaluateExpressions();
-                return "";
+                var ret = c.evaluateExpressions();
+                return ret.ToString();
             } catch (Exception e) {
                 return "Error evaluating expression: " + e;
             }
