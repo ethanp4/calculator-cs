@@ -5,12 +5,16 @@ using System.Text.RegularExpressions;
 namespace Assignment1 {
     // this object represents an expression (ie 5+2*3)
     public class Expression {
-        public string stringExpr { get; set; }
-        private bool isEvaluated { get; set; } = false; //modified 
+        public string stringExpr;
+        //private bool isEvaluated; //modified 
         private List<string> postFixExpr;
         public Expression(string expr) {
             stringExpr = expr;
             postFixExpr = convertToPostfix(expr); //addwd 
+        }
+
+        public List<string> getExpression() {
+            return postFixExpr;
         }
 
         // convert the string to a postfix expression (Reverse Polish Notation)
@@ -81,8 +85,11 @@ namespace Assignment1 {
         // regardless of if it is sorted by OOP or not
         public double evaluateExpr() {
             Console.WriteLine("evaluating");
-            foreach (var e in postFixExpr) {
-                Console.Write(e);
+            char ch;
+            int val;
+            int A, B;
+            for(int i = 0; char.Parse(postFixExpr[i]) != ')'; i++) {
+
             }
             return 0;
         }
@@ -92,6 +99,10 @@ namespace Assignment1 {
     public class Calculation {
         private Expression expr;
         public Calculation() { }
+
+        public List<string> getExpression() {
+            return expr.getExpression();
+        }
 
         //return value is false if it is not a valid expression
         public bool setExpression(string str) {
@@ -116,6 +127,10 @@ namespace Assignment1 {
                 // TODO Evaluate the expression and return the result
                 var c = new Calculation();
                 if (!c.setExpression(input)) { return "expression invalid"; }
+                Console.WriteLine("printing expression");
+                foreach (var e in c.getExpression()) {
+                    Console.Write(e + " ");
+                }
                 c.evaluateExpressions();
                 return "";
             } catch (Exception e) {
