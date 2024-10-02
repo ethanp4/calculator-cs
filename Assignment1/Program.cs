@@ -30,9 +30,10 @@ namespace Assignment1 {
 
                 if (char.IsDigit(ch)) { // added: Parse numbers
                     string number = string.Empty;
-                    if (prevCh == '-') {
-                        number = "-";
-                    }
+                    //if (prevCh == '-') {
+                    //    number = "-";
+                    //    i++;
+                    //}
                     while (i < expr.Length && (char.IsDigit(expr[i]) || expr[i] == '.')) {
                         number += expr[i];
                         i++;
@@ -154,10 +155,10 @@ namespace Assignment1 {
                 // TODO Evaluate the expression and return the result
                 var c = new Calculation();
                 if (!c.setExpression(input)) { return "expression invalid"; }
-            Console.WriteLine("printing expression");
-            foreach (var e in c.getExpression()) {
-                Console.Write(e + " ");
-            }
+            //Console.WriteLine("printing expression");
+            //foreach (var e in c.getExpression()) {
+            //    Console.Write(e + " ");
+            //}
             var ret = c.evaluateExpressions();
                 return ret.ToString();
             //} catch (Exception e) {
