@@ -22,7 +22,7 @@ namespace Assignment1 {
         public List<string> convertToPostfix(string expr) {
             var ret = new List<string>();
             var operatorStack = new Stack<char>(); // added: Stack to hold operators
-
+            char prevCh = ' ';
             for (int i = 0; i < expr.Length; i++) {
                 char ch = expr[i];
 
@@ -30,6 +30,9 @@ namespace Assignment1 {
 
                 if (char.IsDigit(ch)) { // added: Parse numbers
                     string number = string.Empty;
+                    if (prevCh == '-') {
+                        number = "-";
+                    }
                     while (i < expr.Length && (char.IsDigit(expr[i]) || expr[i] == '.')) {
                         number += expr[i];
                         i++;
@@ -51,6 +54,7 @@ namespace Assignment1 {
                     }
                     operatorStack.Push(ch); // Push current operator
                 }
+                prevCh = ch;
             }
 
             // Pop remaining operators
@@ -84,33 +88,33 @@ namespace Assignment1 {
         // evaluates the postfix expression and returns the result
         // regardless of if it is sorted by OOP or not
         public double evaluateExpr() {
-            Console.WriteLine("evaluating");
-            var stack = new Stack<int>();
+            //Console.WriteLine("evaluating");
+            var stack = new Stack<float>();
             for (int i = 0; i < postFixExpr.Count; i++) {
                 var e = postFixExpr[i];
                 if (isOperator(e)) {
-                    int a;
-                    int b;
+                    float a;
+                    float b;
                     switch (e) {
                         case ("*"):
                             stack.Push(stack.Pop() * stack.Pop());
-                            break;
-                        case ("-"):
-                            a = stack.Pop();
-                            b = stack.Pop();
-                            stack.Push(b - a);
-                            break;
-                        case ("+"):
-                            stack.Push(stack.Pop() + stack.Pop());
                             break;
                         case ("/"):
                             a = stack.Pop();
                             b = stack.Pop();
                             stack.Push(b / a);
                             break;
+                        case ("+"):
+                            stack.Push(stack.Pop() + stack.Pop());
+                            break;
+                        case ("-"):
+                            a = stack.Pop();
+                            b = stack.Pop();
+                            stack.Push(b - a);
+                            break;
                     }
                 } else {
-                    stack.Push(int.Parse(e));
+                    stack.Push(float.Parse(e));
                 }
             }
 
@@ -146,19 +150,19 @@ namespace Assignment1 {
 
     public class Program {
         public static string ProcessCommand(string input) {
-            try {
+            //try {
                 // TODO Evaluate the expression and return the result
                 var c = new Calculation();
                 if (!c.setExpression(input)) { return "expression invalid"; }
-                Console.WriteLine("printing expression");
-                foreach (var e in c.getExpression()) {
-                    Console.Write(e + " ");
-                }
-                var ret = c.evaluateExpressions();
-                return ret.ToString();
-            } catch (Exception e) {
-                return "Error evaluating expression: " + e;
+            Console.WriteLine("printing expression");
+            foreach (var e in c.getExpression()) {
+                Console.Write(e + " ");
             }
+            var ret = c.evaluateExpressions();
+                return ret.ToString();
+            //} catch (Exception e) {
+            //    return "Error evaluating expression: " + e;
+            //}
         }
 
         static void Main(string[] args) {
