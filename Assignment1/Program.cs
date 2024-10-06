@@ -19,53 +19,73 @@ namespace Assignment1 {
 
         // convert the string to a postfix expression (Reverse Polish Notation)
         // without sorting it by order of operations
-        public List<string> convertToPostfix(string expr) {
+        public List<string> convertToPostfix(string expr)
+        {
             var ret = new List<string>();
-            var operatorStack = new Stack<char>(); // added: Stack to hold operators
-            char prevCh = ' ';
-            for (int i = 0; i < expr.Length; i++) {
+
+            var operatorStack = new Stack<char>();
+            expr = expr.Replace('–', '-'); // Handle non-standard subtraction symbols
+
+            for (int i = 0; i < expr.Length; i++)
+            {
                 char ch = expr[i];
 
-                if (char.IsWhiteSpace(ch)) continue; // ignore empty spaces
+                if (char.IsWhiteSpace(ch)) continue;
 
-                if (char.IsDigit(ch)) { // added: Parse numbers
+
+                // Handle numbers and negative numbers
+                if (char.IsDigit(ch) || (ch == '-' && (i == 0 || expr[i - 1] == '(' || isOperator(expr[i - 1]))))
+                {
                     string number = string.Empty;
-                    //if (prevCh == '-') {
-                    //    number = "-";
-                    //    i++;
-                    //}
-                    while (i < expr.Length && (char.IsDigit(expr[i]) || expr[i] == '.')) {
+
+                    // Handle negative numbers
+                    if (ch == '-')
+                    {
+                        number += ch;  // Add the '-' sign
+                        i++;
+                    }
+
+                    // Continue parsing the number after the '-' or directly
+                    while (i < expr.Length && (char.IsDigit(expr[i]) || expr[i] == '.'))
+                    {
                         number += expr[i];
                         i++;
                     }
-                    i--; // adjust index after loop
-                    ret.Add(number);
-                } else if (ch == '(') {
-                    operatorStack.Push(ch); // added: Push '(' to stack
-                } else if (ch == ')') {
-                    // added: Pop operators until '(' is found
-                    while (operatorStack.Count > 0 && operatorStack.Peek() != '(') {
+
+                    i--; // Adjust index after loop
+                    ret.Add(number); // Add the parsed number
+                }
+                else if (ch == '(')
+                {
+                    operatorStack.Push(ch);
+                }
+                else if (ch == ')')
+                {
+                    while (operatorStack.Count > 0 && operatorStack.Peek() != '(')
+                    {
                         ret.Add(operatorStack.Pop().ToString());
                     }
                     operatorStack.Pop(); // Pop the '('
-                } else if (isOperator(ch.ToString())) {
-                    // added: Pop operators with higher or equal precedence
-                    while (operatorStack.Count > 0 && Prior(operatorStack.Peek()) >= Prior(ch)) {
+                }
+                else if (isOperator(ch))
+                {
+                    while (operatorStack.Count > 0 && Prior(operatorStack.Peek()) >= Prior(ch))
+                    {
                         ret.Add(operatorStack.Pop().ToString());
                     }
-                    operatorStack.Push(ch); // Push current operator
+                    operatorStack.Push(ch);
                 }
                 prevCh = ch;
             }
 
-            // Pop remaining operators
-            while (operatorStack.Count > 0) {
+            // Pop remaining operators from the stack
+            while (operatorStack.Count > 0)
+            {
                 ret.Add(operatorStack.Pop().ToString());
             }
 
             return ret;
         }
-
 
         //added:to determine the order of operatord evaluated in an expression
         private int Prior(char op) {
@@ -82,93 +102,153 @@ namespace Assignment1 {
         }
 
         // return true if "ch" is an operator
-        private bool isOperator(string ch) {
-            return Regex.IsMatch(ch, "^[=+/*]+$");
+        private bool isOperator(char ch) 
+        {
+            return ch == '+' || ch == '-' || ch == '*' || ch == '/';
         }
 
-        // evaluates the postfix expression and returns the result
-        // regardless of if it is sorted by OOP or not
-        public double evaluateExpr() {
-            //Console.WriteLine("evaluating");
-            var stack = new Stack<float>();
-            for (int i = 0; i < postFixExpr.Count; i++) {
-                var e = postFixExpr[i];
-                if (isOperator(e)) {
-                    float a;
-                    float b;
-                    switch (e) {
-                        case ("*"):
-                            stack.Push(stack.Pop() * stack.Pop());
+        public double evaluateExpr()
+        {
+            var evaluationStack = new Stack<double>(); // ADDED: Stack for evaluation
+
+            foreach (var token in postFixExpr)
+            {
+                if (double.TryParse(token, out double number))
+                {
+                    evaluationStack.Push(number); // Push number to stack
+                }
+                else if (isOperator(token[0]) && token.Length == 1)
+                {
+                    double b = evaluationStack.Pop();
+                    double a = evaluationStack.Pop();
+
+                    switch (token)
+                    {
+                        case "+":
+                            evaluationStack.Push(a + b);
                             break;
-                        case ("/"):
-                            a = stack.Pop();
-                            b = stack.Pop();
-                            stack.Push(b / a);
+                        case "-":
+                            evaluationStack.Push(a - b);
                             break;
-                        case ("+"):
-                            stack.Push(stack.Pop() + stack.Pop());
+                        case "*":
+                            evaluationStack.Push(a * b);
                             break;
-                        case ("-"):
-                            a = stack.Pop();
-                            b = stack.Pop();
-                            stack.Push(b - a);
+                        case "/":
+                            evaluationStack.Push(a / b);
                             break;
                     }
-                } else {
-                    stack.Push(float.Parse(e));
                 }
             }
 
-            return stack.Pop();
+            isEvaluated = true; // Mark as evaluated
+            return evaluationStack.Pop(); // Return result
         }
     }
+
+
 
     // this class represents a calculator "session" and its expressions / state
     public class Calculation {
         private Expression expr;
         public Calculation() { }
 
-        public List<string> getExpression() {
-            return expr.getExpression();
-        }
-
+        //can be later extended to add multiple expressions in order
+        //then calculate all of them sequentially
         //return value is false if it is not a valid expression
-        public bool setExpression(string str) {
-            str = Regex.Replace(str, @"\s+", " "); // get rid of repeating spaces
-            str = str.Trim();
-            if (!Regex.IsMatch(str, "^[0-9+ ()*-/]+$")) { return false; }
-            expr = new Expression(str);
+       public bool setExpression(string exprStr)
+        {
+            if (!isExpressionValid(exprStr)) { return false; }
+
+            expr = new Expression(exprStr);
             return true;
         }
 
+        // checks if the expression can be evaluated in the first place
+        //first check if expression is only + - / */x, (), and numbers
+        //then expression should make sense ie 2+3 4* and 9(*3*5) are not valid
+        public bool isExpressionValid(string expr)
+        {
+            var res = Regex.IsMatch(expr, "^[0-9+ ()*-/]+$"); // expression can only be these characters and must be at least 1 long
+            //Console.WriteLine(expr + " is " + res);
+            string previous = ""; // expression must go number/operator/number/operator
+            string current = "";
+            expr = Regex.Replace(expr, @"\s+", " "); // get rid of repeating spaces
+            expr = expr.Trim();
+            int bracketCounter = 0;
+            var split = expr.Split(' ');
+            for (int i = 0; i < split.Length; i++)
+            {
+                previous = current;
+                current = split[i];
+                // previous and current cannot both be numbers
+                if (previous != "")
+                { // check only after first iteration and skip brackets
+                    if (float.TryParse(previous, out float _) == float.TryParse(current, out float _))
+                    {
+                        Console.WriteLine("previous and current cannot both be numbers");
+                        return false;
+                    }
+                }
+                if (current == "(")
+                {
+                    bracketCounter++;
+                }
+                else if (current == ")")
+                {
+                    bracketCounter--;
+                }
+                if (bracketCounter < 0)
+                {
+                    Console.WriteLine("Mismatched brackets");
+                    return false;
+                }
+            }
+            Console.WriteLine("it is an expression");
+            return true;
+        }
+
+        // ADDED: Helper method to check if a character is an operator
+        private bool isOperator(char ch)
+        {
+            return ch == '+' || ch == '-' || ch == '*' || ch == '/';
+        }
+
+        //
         public double evaluateExpressions() {
-            if (expr == null) { // if no expressions are set yet
+            if (expr == null) 
+            { // if no expressions are set yet
                 throw new Exception("no expressions loaded"); //wrap evaluateExpressions call in try catch
             }
             return expr.evaluateExpr();
         }
     }
 
-    public class Program {
-        public static string ProcessCommand(string input) {
-            //try {
-                // TODO Evaluate the expression and return the result
-                var c = new Calculation();
-                if (!c.setExpression(input)) { return "expression invalid"; }
-            //Console.WriteLine("printing expression");
-            //foreach (var e in c.getExpression()) {
-            //    Console.Write(e + " ");
-            //}
-            var ret = c.evaluateExpressions();
-                return ret.ToString();
-            //} catch (Exception e) {
-            //    return "Error evaluating expression: " + e;
-            //}
+    public class Program
+    {
+        public static Calculation calculation = new Calculation(); // ADDED: Global variable for calculation
+
+        public static string ProcessCommand(string input)
+        {
+            try
+            {
+                if (!calculation.setExpression(input))
+                {
+                    return "Invalid expression!";
+                }
+                double result = calculation.evaluateExpressions(); // ADDED: Evaluate expression
+                return result.ToString();
+            }
+            catch (Exception e)
+            {
+                return "Error evaluating expression: " + e.Message;
+            }
         }
 
-        static void Main(string[] args) {
+        static void Main(string[] args)
+        {
             string input;
-            while ((input = Console.ReadLine()) != "exit") {
+            while ((input = Console.ReadLine()) != "exit")
+            {
                 Console.WriteLine(ProcessCommand(input));
             }
         }
