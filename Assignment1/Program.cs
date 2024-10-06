@@ -75,7 +75,6 @@ namespace Assignment1 {
                     }
                     operatorStack.Push(ch);
                 }
-                prevCh = ch;
             }
 
             // Pop remaining operators from the stack
@@ -140,7 +139,6 @@ namespace Assignment1 {
                 }
             }
 
-            isEvaluated = true; // Mark as evaluated
             return evaluationStack.Pop(); // Return result
         }
     }
@@ -168,43 +166,7 @@ namespace Assignment1 {
         //then expression should make sense ie 2+3 4* and 9(*3*5) are not valid
         public bool isExpressionValid(string expr)
         {
-            var res = Regex.IsMatch(expr, "^[0-9+ ()*-/]+$"); // expression can only be these characters and must be at least 1 long
-            //Console.WriteLine(expr + " is " + res);
-            string previous = ""; // expression must go number/operator/number/operator
-            string current = "";
-            expr = Regex.Replace(expr, @"\s+", " "); // get rid of repeating spaces
-            expr = expr.Trim();
-            int bracketCounter = 0;
-            var split = expr.Split(' ');
-            for (int i = 0; i < split.Length; i++)
-            {
-                previous = current;
-                current = split[i];
-                // previous and current cannot both be numbers
-                if (previous != "")
-                { // check only after first iteration and skip brackets
-                    if (float.TryParse(previous, out float _) == float.TryParse(current, out float _))
-                    {
-                        Console.WriteLine("previous and current cannot both be numbers");
-                        return false;
-                    }
-                }
-                if (current == "(")
-                {
-                    bracketCounter++;
-                }
-                else if (current == ")")
-                {
-                    bracketCounter--;
-                }
-                if (bracketCounter < 0)
-                {
-                    Console.WriteLine("Mismatched brackets");
-                    return false;
-                }
-            }
-            Console.WriteLine("it is an expression");
-            return true;
+            return Regex.IsMatch(expr, "^[0-9+ ()*-/]+$"); // expression can only be these characters and must be at least 1 long
         }
 
         // ADDED: Helper method to check if a character is an operator
