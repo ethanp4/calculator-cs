@@ -4,15 +4,17 @@ using System.Text.RegularExpressions;
 
 namespace Assignment1 {
     // this object represents an expression (ie 5+2*3)
-    public class Expression 
-    {
-        private string stringExpr { get; set; }
-        private bool isEvaluated { get; set; } = false; //modified 
+    public class Expression {
+        public string stringExpr;
+        //private bool isEvaluated; //modified 
         private List<string> postFixExpr;
         public Expression(string expr) {
             stringExpr = expr;
             postFixExpr = convertToPostfix(expr); //addwd 
-            
+        }
+
+        public List<string> getExpression() {
+            return postFixExpr;
         }
 
         // convert the string to a postfix expression (Reverse Polish Notation)
@@ -20,6 +22,7 @@ namespace Assignment1 {
         public List<string> convertToPostfix(string expr)
         {
             var ret = new List<string>();
+
             var operatorStack = new Stack<char>();
             expr = expr.Replace('–', '-'); // Handle non-standard subtraction symbols
 
@@ -28,6 +31,7 @@ namespace Assignment1 {
                 char ch = expr[i];
 
                 if (char.IsWhiteSpace(ch)) continue;
+
 
                 // Handle numbers and negative numbers
                 if (char.IsDigit(ch) || (ch == '-' && (i == 0 || expr[i - 1] == '(' || isOperator(expr[i - 1]))))
@@ -71,6 +75,7 @@ namespace Assignment1 {
                     }
                     operatorStack.Push(ch);
                 }
+                prevCh = ch;
             }
 
             // Pop remaining operators from the stack
@@ -83,10 +88,8 @@ namespace Assignment1 {
         }
 
         //added:to determine the order of operatord evaluated in an expression
-        private int Prior(char op)
-        {
-            switch (op)
-            {
+        private int Prior(char op) {
+            switch (op) {
                 case '+':
                 case '-':
                     return 1;
@@ -146,8 +149,6 @@ namespace Assignment1 {
 
     // this class represents a calculator "session" and its expressions / state
     public class Calculation {
-        // can change this to hold multiple expressions
-        // for referring to the previous answer 
         private Expression expr;
         public Calculation() { }
 
